@@ -25,10 +25,29 @@ Runner.run(runner, engine);
 var panel = new Panel(30, 700, 0.8, render.options.width / 2, render.options.height / 2, "red");
 Composite.add(world, panel.composite);
 
-var fruit = new Fruit("Cherries", panel.left, 0);
-panel.changeFruit(fruit);
+Composite.add(world, new Panel(10, 500, 0.8, render.options.width / 2 + 500, render.options.height / 2, "orange").composite);
+
+const placeholder_seed = "CH-ST-GR-DK-PS";
+const fruits = placeholder_seed.split("-");
+var currentFruit = 0;
+panel.changeFruit(new Fruit(fruits[currentFruit], panel.left, 0));
 
 var speed = 10
+
+function dropFruit() {
+  if (panel.currentFruit === null) {
+    return;
+  }
+  panel.dropFruit();
+  currentFruit += 1;
+  if (currentFruit >= fruits.length) {
+    currentFruit = 0;
+  }
+  setTimeout(() => {
+    panel.changeFruit(
+      new Fruit(fruits[currentFruit], panel.left, 0));
+  }, "1000")
+}
 
 window.onkeydown = (event) => {
   if (event.key === "ArrowLeft") {
@@ -36,6 +55,6 @@ window.onkeydown = (event) => {
   } else if (event.key === "ArrowRight") {
     panel.goRigth(speed);
   } else if (event.key === " ") {
-    panel.dropFruit();
+    dropFruit();
   }
 }

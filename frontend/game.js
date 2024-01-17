@@ -1,75 +1,128 @@
-import { Bodies, Body, Engine, Events, Render, Runner, World, Composite } from "matter-js";
+import { Engine, Render, Runner, World, Composite } from "matter-js";
 import Panel from "/panel.js";
-import Fruit from "/fruit.js";
+import fruitsInfo from "../common/fruits.js";
 
-const engine = Engine.create(),
-  world = engine.world;
+class GameMode {
+  constructor(seed) {
+    this.inputDelay = 1000;
+    let engine = Engine.create();
+    this.engine = engine;
+    this.world = this.engine.world;
 
-// TODO change width and height to be dynamic
-const render = Render.create({
-  engine,
-  element: document.body,
-  options: {
-    wireframes: false,
-    background: "black",
-    width: 1500,
-    height: 900,
-  },
-});
+    // TODO change width and height to be dynamic
+    let render = Render.create({
+      engine,
+      element: document.body,
+      options: {
+        wireframes: false,
+        background: "black",
+        width: 1500,
+        height: 900,
+      },
+    });
 
-Render.run(render);
+    Render.run(render);
 
-const runner = Runner.create();
-Runner.run(runner, engine);
+    let runner = Runner.create();
+    Runner.run(runner, engine);
 
-var panel = new Panel(
-  engine,
-  30,
-  700,
-  0.8,
-  render.options.width / 2,
-  render.options.height / 2,
-  "red");
+    this.fruitsInfo = fruitsInfo;
+    this.loadFruits();
 
-Composite.add(world, panel.composite);
+    this.panel = new Panel(
+      this,
+      30,
+      700,
+      0.8,
+      render.options.width / 2,
+      0.55 * render.options.height,
+      "orange",
+      this.fruitsInfo);
 
-Composite.add(world, new Panel(
-  engine,
-  10,
-  500,
-  0.8,
-  render.options.width / 2 + 500,
-  render.options.height / 2,
-  "orange").composite);
+    Composite.add(this.world, this.panel.composite);
 
-const placeholder_seed = "PS";
-const fruits = placeholder_seed.split("-");
-var currentFruit = 0;
-panel.changeFruit(new Fruit(fruits[currentFruit], 0, 0));
+    this.fruits = seed.split("-");
+    this.currentFruit = 0;
+    this.panel.changeFruit(this.fruits[this.currentFruit]);
 
-var speed = 10
-
-function dropFruit() {
-  if (panel.currentFruit === null) {
-    return;
+    this.speed = 10
   }
-  panel.dropFruit();
-  currentFruit += 1;
-  if (currentFruit >= fruits.length) {
-    currentFruit = 0;
+
+  dropFruit() {
+    if (this.panel.currentFruit === null) {
+      return;
+    }
+    this.panel.dropFruit();
+    this.currentFruit += 1;
+    if (this.currentFruit >= this.fruits.length) {
+      this.currentFruit = 0;
+    }
+    setTimeout(() => {
+      this.panel.changeFruit(this.fruits[this.currentFruit]);
+    }, this.inputDelay)
   }
-  setTimeout(() => {
-    panel.changeFruit(
-      new Fruit(fruits[currentFruit], 0, 0));
-  }, "1000")
+
+  gameOver() {
+    this.panel.fruits.forEach(fruit => {
+      World.remove(this.panel.composite, fruit.body);
+    });
+    console.log("game over");
+  }
+
+  async loadFruits() {
+    const loadPromises = this.fruitsInfo.map((fruit) => {
+      return new Promise((resolve, reject) => {
+        let image = new Image();
+        image.src = fruit.sprite;
+        fruit.sprite = image;
+        image.onload = resolve;
+        image.onerror = reject;
+      });
+    });
+
+    try {
+      await Promise.all(loadPromises);
+      console.log('All fruits loaded');
+    } catch (error) {
+      console.error('Error loading fruits', error);
+    }
+  }
 }
 
-window.onkeydown = (event) => {
-  if (event.key === "ArrowLeft") {
-    panel.goLeft(speed);
-  } else if (event.key === "ArrowRight") {
-    panel.goRigth(speed);
-  } else if (event.key === " ") {
-    dropFruit();
+class InputManager {
+  constructor(gameMode, goLeft, goRight, dropFruit) {
+    this.gameMode = gameMode;
+    this.goLeft = goLeft;
+    this.goRight = goRight;
+    this.dropFruit = dropFruit;
+
+    window.onkeydown = (event) => {
+      switch (event.key) {
+        case this.goLeft:
+          gameMode.panel.goLeft(gameMode.speed);
+          break;
+        case this.goRight:
+          gameMode.panel.goRigth(gameMode.speed);
+          break;
+        case this.dropFruit:
+          gameMode.dropFruit();
+          break;
+      }
+    }
   }
 }
+
+const defaultSettings = {
+  goLeft: "ArrowLeft",
+  goRight: "ArrowRight",
+  dropFruit: " ",
+}
+
+let placeHolderSeed = "CH-ST-GR-DK-PS-AP-PR-PE-PN";
+let gameMode = new GameMode(placeHolderSeed);
+new InputManager(
+  gameMode,
+  defaultSettings.goLeft,
+  defaultSettings.goRight,
+  defaultSettings.dropFruit
+);

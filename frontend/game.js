@@ -22,15 +22,30 @@ Render.run(render);
 const runner = Runner.create();
 Runner.run(runner, engine);
 
-var panel = new Panel(30, 700, 0.8, render.options.width / 2, render.options.height / 2, "red");
+var panel = new Panel(
+  engine,
+  30,
+  700,
+  0.8,
+  render.options.width / 2,
+  render.options.height / 2,
+  "red");
+
 Composite.add(world, panel.composite);
 
-Composite.add(world, new Panel(10, 500, 0.8, render.options.width / 2 + 500, render.options.height / 2, "orange").composite);
+Composite.add(world, new Panel(
+  engine,
+  10,
+  500,
+  0.8,
+  render.options.width / 2 + 500,
+  render.options.height / 2,
+  "orange").composite);
 
-const placeholder_seed = "CH-ST-GR-DK-PS";
+const placeholder_seed = "PS";
 const fruits = placeholder_seed.split("-");
 var currentFruit = 0;
-panel.changeFruit(new Fruit(fruits[currentFruit], panel.left, 0));
+panel.changeFruit(new Fruit(fruits[currentFruit], 0, 0));
 
 var speed = 10
 
@@ -45,7 +60,7 @@ function dropFruit() {
   }
   setTimeout(() => {
     panel.changeFruit(
-      new Fruit(fruits[currentFruit], panel.left, 0));
+      new Fruit(fruits[currentFruit], 0, 0));
   }, "1000")
 }
 

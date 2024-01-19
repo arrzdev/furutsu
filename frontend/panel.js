@@ -84,9 +84,14 @@ export default class Panel {
     }
 
     changeFruit(fruitCode) {
-        console.log(this.fruitsInfo);
         let newFruit = this.fruitsInfo.find((fruit) => fruit.fruitCode === fruitCode);
-        console.log(newFruit);
+
+        if (this.pointer < this.left + newFruit.radius) {
+            this.pointer = this.left + newFruit.radius;
+        }
+        if (this.pointer > this.right - newFruit.radius) {
+            this.pointer = this.right - newFruit.radius;
+        }
 
         this.currentFruit = new Fruit(
             newFruit.name,

@@ -106,20 +106,25 @@ class InputManager {
     this.goLeft = goLeft;
     this.goRight = goRight;
     this.dropFruit = dropFruit;
-    let interval = null;
+    let intervalR = null;
+    let intervalL = null;
 
     window.onkeydown = (event) => {
       if (!gameMode.state == "play") { return }
       switch (event.key) {
         case this.goLeft:
-          if (interval) return;
-          interval = setInterval(() => {
+          if (intervalL) return;
+          clearInterval(intervalR);
+          intervalR = null;
+          intervalL = setInterval(() => {
             gameMode.panel.goLeft(gameMode.speed);
           }, 1000 / 60);
           break;
         case this.goRight:
-          if (interval) return;
-          interval = setInterval(() => {
+          if (intervalR) return;
+          clearInterval(intervalL);
+          intervalL = null;
+          intervalR = setInterval(() => {
             gameMode.panel.goRigth(gameMode.speed);
           }, 1000 / 60);
           break;
@@ -131,10 +136,14 @@ class InputManager {
 
     window.onkeyup = (event) => {
       switch (event.code) {
-        case "ArrowLeft":
-        case "ArrowRight":
-          clearInterval(interval);
-          interval = null;
+        case this.goLeft:
+          clearInterval(intervalL);
+          intervalL = null;
+          break;
+        case this.goRight:
+          clearInterval(intervalR);
+          intervalR = null;
+
       }
     };
   }

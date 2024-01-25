@@ -5,7 +5,7 @@ import fruitsInfo from "../common/fruits.js";
 class GameMode {
   constructor(fruitsInfo) {
     this.inputDelay = 900;
-    let engine = Engine.create();
+    let engine = Engine.create({ gravity: { x: 0, y: 1.5 } });
     this.engine = engine;
     this.world = this.engine.world;
     this.state = "loading"
@@ -26,7 +26,7 @@ class GameMode {
 
     let runner = Runner.create();
     Runner.run(runner, engine);
-    this.speed = 10
+    this.speed = 5;
 
     this.fruitsInfo = fruitsInfo;
     this.loadFruits().then(() => {
@@ -51,7 +51,7 @@ class GameMode {
 
   getRandomFruit(max) {
     let int = Math.floor(Math.random() * max);
-    console.log(int);
+    // console.log(int);
     return this.fruitsInfo.find((fruit) => fruit.evolutionIndex === int).fruitCode
   }
 
@@ -106,21 +106,37 @@ class InputManager {
     this.goLeft = goLeft;
     this.goRight = goRight;
     this.dropFruit = dropFruit;
+    let interval = null;
 
     window.onkeydown = (event) => {
       if (!gameMode.state == "play") { return }
       switch (event.key) {
         case this.goLeft:
-          gameMode.panel.goLeft(gameMode.speed);
+          if (interval) return;
+          interval = setInterval(() => {
+            gameMode.panel.goLeft(gameMode.speed);
+          }, 1000 / 60);
           break;
         case this.goRight:
-          gameMode.panel.goRigth(gameMode.speed);
+          if (interval) return;
+          interval = setInterval(() => {
+            gameMode.panel.goRigth(gameMode.speed);
+          }, 1000 / 60);
           break;
         case this.dropFruit:
           gameMode.dropFruit();
           break;
       }
     }
+
+    window.onkeyup = (event) => {
+      switch (event.code) {
+        case "ArrowLeft":
+        case "ArrowRight":
+          clearInterval(interval);
+          interval = null;
+      }
+    };
   }
 }
 

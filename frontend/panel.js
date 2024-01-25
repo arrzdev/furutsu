@@ -7,10 +7,15 @@ class Fruit {
         this.radius = radius;
         this.body = Bodies.circle(posX, posY, this.radius, {
             isSleeping: true,
+            friction: 10,
             render: {
+                density: 10,
+                torque: 0.5,
                 sprite: {
                     texture: sprite.src,
-                    yOffset: (sprite.height - sprite.width) / (sprite.height * 2)
+                    yOffset: (sprite.height - sprite.width) / (sprite.height * 2),
+                    yScale: (radius / sprite.height * 2) * (sprite.height / sprite.width),
+                    xScale: radius / sprite.width * 2
                 },
                 opacity: 2
             }
@@ -60,11 +65,22 @@ export default class Panel {
             render: { opacity: 0 }
         });
 
+        this.guide = Bodies.rectangle(
+            centerX,
+            centerY - thickness,
+            thickness / 5,
+            height, {
+            isStatic: true,
+            isSensor: true,
+            render: { fillStyle: "white" }
+        });
+
         Composite.add(composite, [
             bottomBar,
             leftBar,
             rightBar,
-            deathZone,]);
+            deathZone,
+            this.guide]);
 
         this.gameMode = gameMode;
         this.composite = composite;
@@ -72,7 +88,6 @@ export default class Panel {
         this.left = centerX - height * ratio / 2 + thickness;
         this.right = centerX + height * ratio / 2 - thickness;
         this.top = centerY - height / 2 - thickness;
-        this.pointer = centerX;
 
         this.deathZone = deathZone;
         this.currentFruit = null;
@@ -86,19 +101,22 @@ export default class Panel {
     changeFruit(fruitCode) {
         let newFruit = this.fruitsInfo.find((fruit) => fruit.fruitCode === fruitCode);
 
-        if (this.pointer < this.left + newFruit.radius) {
-            this.pointer = this.left + newFruit.radius;
+        let radius = newFruit.radius * (this.right - this.left) / 425;
+
+        if (this.guide.position.x < this.left + radius) {
+            Body.setPosition(this.guide, Vector.create(this.left + radius, this.guide.position.y));
         }
-        if (this.pointer > this.right - newFruit.radius) {
-            this.pointer = this.right - newFruit.radius;
+        if (this.guide.position.x > this.right - radius) {
+            Body.setPosition(this.guide, Vector.create(this.right - radius, this.guide.position.y));
         }
+
 
         this.currentFruit = new Fruit(
             newFruit.name,
             newFruit.sprite,
             newFruit.evolutionIndex,
-            newFruit.radius,
-            this.pointer,
+            radius,
+            this.guide.position.x,
             this.top - newFruit.radius / 2);
 
         this.currentFruit.body.isSensor = true
@@ -107,28 +125,42 @@ export default class Panel {
 
     goLeft(speed) {
         if (this.currentFruit === null) {
+            let newPos = this.guide.position.x - speed;
+            if (newPos < this.left) {
+                newPos = this.left;
+            }
+            Body.setPosition(this.guide, Vector.create(newPos, this.guide.position.y));
             return;
         }
-        let newPosX = this.pointer - speed;
+        let newPosX = this.guide.position.x - speed;
         if (newPosX < this.left + this.currentFruit.radius) {
             newPosX = this.left + this.currentFruit.radius;
         }
+
         let newPos = Vector.create(newPosX, this.currentFruit.body.position.y)
-        this.pointer = newPosX;
+        let newPosGuide = Vector.create(newPosX, this.guide.position.y)
         Body.setPosition(this.currentFruit.body, newPos);
+        Body.setPosition(this.guide, newPosGuide);
     }
 
     goRigth(speed) {
         if (this.currentFruit === null) {
+            let newPos = this.guide.position.x + speed;
+            if (newPos > this.right) {
+                newPos = this.right;
+            }
+            Body.setPosition(this.guide, Vector.create(newPos, this.guide.position.y));
             return;
         }
-        let newPosX = this.pointer + speed;
+        let newPosX = this.guide.position.x + speed;
         if (newPosX > this.right - this.currentFruit.radius) {
             newPosX = this.right - this.currentFruit.radius;
         }
         let newPos = Vector.create(newPosX, this.currentFruit.body.position.y)
+        let newPosGuide = Vector.create(newPosX, this.guide.position.y)
         this.pointer = newPosX;
         Body.setPosition(this.currentFruit.body, newPos);
+        Body.setPosition(this.guide, newPosGuide);
     }
 
     dropFruit() {
@@ -161,12 +193,13 @@ export default class Panel {
         }
 
         let fruit = this.fruitsInfo.find((fruit) => fruit.evolutionIndex === evolutionIndex);
+        let radius = fruit.radius * (this.right - this.left) / 425;
 
         let newFruit = new Fruit(
             fruit.name,
             fruit.sprite,
             evolutionIndex,
-            fruit.radius,
+            radius,
             newPosition.x,
             newPosition.y)
 

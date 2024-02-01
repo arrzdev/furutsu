@@ -7,7 +7,8 @@ class Fruit {
         this.radius = radius;
         this.body = Bodies.circle(posX, posY, this.radius, {
             isSleeping: true,
-            friction: 10,
+            friction: 15,
+            restitution: 0.1,
             render: {
                 density: 10,
                 torque: 0.5,

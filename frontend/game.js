@@ -5,7 +5,7 @@ import fruitsInfo from "../common/fruits.js";
 class GameMode {
   constructor(fruitsInfo) {
     this.inputDelay = 900;
-    let engine = Engine.create({ gravity: { x: 0, y: 1.5 } });
+    let engine = Engine.create({ gravity: { x: 0, y: 0.6 } });
     this.engine = engine;
     this.world = this.engine.world;
     this.state = "loading"
@@ -44,7 +44,7 @@ class GameMode {
 
       // this.fruits = seed.split("-");
       // this.currentFruit = 0;
-      this.panel.changeFruit(this.getRandomFruit(4));
+      this.panel.changeFruit(this.getRandomFruit(5));
       this.state = "play";
     });
   }
@@ -65,7 +65,7 @@ class GameMode {
     //   this.currentFruit = 0;
     // }
     setTimeout(() => {
-      this.panel.changeFruit(this.getRandomFruit(4));
+      this.panel.changeFruit(this.getRandomFruit(5));
     }, this.inputDelay)
   }
 

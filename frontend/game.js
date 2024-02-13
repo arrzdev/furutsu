@@ -44,6 +44,7 @@ class GameMode {
 
       // this.fruits = seed.split("-");
       // this.currentFruit = 0;
+      this.nextFruit = this.getRandomFruit(5);
       this.panel.changeFruit(this.getRandomFruit(5));
       this.state = "play";
     });
@@ -65,7 +66,9 @@ class GameMode {
     //   this.currentFruit = 0;
     // }
     setTimeout(() => {
-      this.panel.changeFruit(this.getRandomFruit(5));
+      this.panel.changeFruit(this.nextFruit);
+      this.nextFruit = this.getRandomFruit(5);
+      this.panel.changeNextFruit(this.nextFruit);
     }, this.inputDelay)
   }
 

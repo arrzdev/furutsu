@@ -69,7 +69,7 @@ export default class Panel {
         this.guide = Bodies.rectangle(
             centerX,
             centerY - thickness,
-            thickness / 5,
+            thickness / 8,
             height, {
             isStatic: true,
             isSensor: true,
@@ -94,9 +94,32 @@ export default class Panel {
         this.currentFruit = null;
         this.fruitsInGame = [];
 
+        this.nextFruit = null
+
         this.fruitsInfo = fruits;
 
         Events.on(this.gameMode.engine, 'collisionStart', this.handleCollision.bind(this));
+    }
+
+    changeNextFruit(fruitCode) {
+        let newFruit = this.fruitsInfo.find((fruit) => fruit.fruitCode === fruitCode);
+
+        let radius = newFruit.radius * (this.right - this.left) / 425;
+
+        if (this.nextFruit != null) {
+            Composite.remove(this.composite, this.nextFruit.body)
+        }
+
+        this.nextFruit = new Fruit(
+            newFruit.name,
+            newFruit.sprite,
+            newFruit.evolutionIndex,
+            radius,
+            this.right * 1.8 - this.left,
+            this.top - newFruit.radius / 2);
+
+        this.nextFruit.body.isSensor = true
+        Composite.add(this.composite, this.nextFruit.body);
     }
 
     changeFruit(fruitCode) {
@@ -110,7 +133,6 @@ export default class Panel {
         if (this.guide.position.x > this.right - radius) {
             Body.setPosition(this.guide, Vector.create(this.right - radius, this.guide.position.y));
         }
-
 
         this.currentFruit = new Fruit(
             newFruit.name,

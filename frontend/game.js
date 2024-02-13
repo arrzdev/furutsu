@@ -76,6 +76,8 @@ class GameMode {
     this.panel.fruitsInGame.forEach(fruit => {
       World.remove(this.panel.composite, fruit.body);
     });
+    Composite(this.composite, this.nextFruit.body);
+    this.nexttFruit = null;
     console.log("game over");
   }
 
@@ -109,12 +111,13 @@ class InputManager {
     this.goLeft = goLeft;
     this.goRight = goRight;
     this.dropFruit = dropFruit;
+    let canDrop = true;
     let intervalR = null;
     let intervalL = null;
 
     window.onkeydown = (event) => {
       if (!gameMode.state == "play") { return }
-      switch (event.key) {
+      switch (event.code) {
         case this.goLeft:
           if (intervalL) return;
           clearInterval(intervalR);
@@ -132,12 +135,15 @@ class InputManager {
           }, 1000 / 60);
           break;
         case this.dropFruit:
-          gameMode.dropFruit();
-          break;
+          if (canDrop) {
+            gameMode.dropFruit();
+            canDrop = false;
+          }
       }
     }
 
     window.onkeyup = (event) => {
+      if (!gameMode.state == "play") { return }
       switch (event.code) {
         case this.goLeft:
           clearInterval(intervalL);
@@ -146,7 +152,9 @@ class InputManager {
         case this.goRight:
           clearInterval(intervalR);
           intervalR = null;
-
+          break;
+        case this.dropFruit:
+          canDrop = true;
       }
     };
   }
@@ -155,7 +163,7 @@ class InputManager {
 const defaultSettings = {
   goLeft: "ArrowLeft",
   goRight: "ArrowRight",
-  dropFruit: " ",
+  dropFruit: "Space",
 }
 
 let gameMode = new GameMode(fruitsInfo);

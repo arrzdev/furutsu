@@ -5,7 +5,7 @@ import fruitsInfo from "../common/fruits.js";
 class GameMode {
   constructor(fruitsInfo) {
     this.inputDelay = 900;
-    let engine = Engine.create({ gravity: { x: 0, y: 0.6 } });
+    let engine = Engine.create({ gravity: { x: 0, y: 0.45 } });
     this.engine = engine;
     this.world = this.engine.world;
     this.state = "loading"

@@ -60,10 +60,9 @@ class GameMode {
         const currentTimestamp = performance.now();
         const elapsedMilliseconds = currentTimestamp - this.lastUpdateTimestamp;
 
+        console.log(elapsedMilliseconds)
         if (elapsedMilliseconds >= this.physicsUpdateInterval) {
           Engine.update(this.engine, elapsedMilliseconds);
-
-          // Other physics-related logic can be added here
 
           this.lastUpdateTimestamp = currentTimestamp;
         }

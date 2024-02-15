@@ -5,8 +5,14 @@ import fruitsInfo from "../common/fruits.js";
 class GameMode {
   constructor(fruitsInfo) {
     this.inputDelay = 900;
-    this.engine = Engine.create({ gravity: { x: 0, y: 0.7 } });
-    this.engine.timing.delta = 1000 / 60; // Set target frame rate (60 FPS in this case)
+    this.engine = Engine.create({
+      gravity: { x: 0, y: 0.2 },
+      timing: {
+        deltaTime: 16.67, // Set the fixed time step in milliseconds
+        timeScale: 1, // Adjust time scale if needed
+      },
+    });
+
     this.world = this.engine.world;
     this.state = "loading";
 
@@ -23,6 +29,17 @@ class GameMode {
     });
     render.isFixed = false;
     Render.run(render);
+
+    const gameLoop = () => {
+      Engine.update(this.engine, 16.67); // Use the same fixed time step
+      // Add other game logic here
+
+      // Request the next animation frame
+      requestAnimationFrame(gameLoop);
+    };
+
+    // Start the game loop
+    gameLoop();
 
     let runner = Runner.create();
     Runner.run(runner, this.engine);
@@ -46,13 +63,6 @@ class GameMode {
       this.nextFruit = this.getRandomFruit(5);
       this.panel.changeFruit(this.getRandomFruit(5));
       this.state = "play";
-
-      const gameLoop = () => {
-        requestAnimationFrame(gameLoop);
-        Engine.update(this.engine);
-      };
-
-      gameLoop();
     });
   }
 

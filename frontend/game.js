@@ -54,7 +54,7 @@ class GameMode {
       this.state = "play";
 
       this.lastUpdateTimestamp = performance.now();
-      this.physicsUpdateInterval = 16.67; // Set your desired physics update interval in milliseconds
+      this.physicsUpdateInterval = 33.33; // Set your desired physics update interval in milliseconds
 
       const throttledGameLoop = () => {
         const currentTimestamp = performance.now();

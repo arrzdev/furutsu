@@ -5,14 +5,14 @@ import fruitsInfo from "../common/fruits.js";
 class GameMode {
   constructor(fruitsInfo) {
     this.inputDelay = 900;
-    let engine = Engine.create({ gravity: { x: 0, y: 0.45 } });
-    this.engine = engine;
+    this.engine = Engine.create({ gravity: { x: 0, y: 0.7 } });
+    this.engine.timing.delta = 1000 / 60; // Set target frame rate (60 FPS in this case)
     this.world = this.engine.world;
-    this.state = "loading"
+    this.state = "loading";
 
     // TODO change width and height to be dynamic
     let render = Render.create({
-      engine,
+      engine: this.engine,
       element: document.body,
       options: {
         wireframes: false,
@@ -21,11 +21,11 @@ class GameMode {
         height: 900,
       },
     });
-
+    render.isFixed = false;
     Render.run(render);
 
     let runner = Runner.create();
-    Runner.run(runner, engine);
+    Runner.run(runner, this.engine);
     this.speed = 5;
 
     this.fruitsInfo = fruitsInfo;
@@ -38,15 +38,21 @@ class GameMode {
         render.options.width / 2,
         0.55 * render.options.height,
         "orange",
-        this.fruitsInfo);
+        this.fruitsInfo
+      );
 
       Composite.add(this.world, this.panel.composite);
 
-      // this.fruits = seed.split("-");
-      // this.currentFruit = 0;
       this.nextFruit = this.getRandomFruit(5);
       this.panel.changeFruit(this.getRandomFruit(5));
       this.state = "play";
+
+      const gameLoop = () => {
+        requestAnimationFrame(gameLoop);
+        Engine.update(this.engine);
+      };
+
+      gameLoop();
     });
   }
 

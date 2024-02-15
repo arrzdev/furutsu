@@ -30,17 +30,6 @@ class GameMode {
     render.isFixed = false;
     Render.run(render);
 
-    const gameLoop = () => {
-      Engine.update(this.engine, 16.67); // Use the same fixed time step
-      // Add other game logic here
-
-      // Request the next animation frame
-      requestAnimationFrame(gameLoop);
-    };
-
-    // Start the game loop
-    gameLoop();
-
     let runner = Runner.create();
     Runner.run(runner, this.engine);
     this.speed = 5;
@@ -63,6 +52,28 @@ class GameMode {
       this.nextFruit = this.getRandomFruit(5);
       this.panel.changeFruit(this.getRandomFruit(5));
       this.state = "play";
+
+      this.lastUpdateTimestamp = performance.now();
+      this.physicsUpdateInterval = 16.67; // Set your desired physics update interval in milliseconds
+
+      const throttledGameLoop = () => {
+        const currentTimestamp = performance.now();
+        const elapsedMilliseconds = currentTimestamp - this.lastUpdateTimestamp;
+
+        if (elapsedMilliseconds >= this.physicsUpdateInterval) {
+          Engine.update(this.engine, elapsedMilliseconds);
+
+          // Other physics-related logic can be added here
+
+          this.lastUpdateTimestamp = currentTimestamp;
+        }
+
+        // Request the next animation frame
+        requestAnimationFrame(throttledGameLoop);
+      };
+
+      // Start the throttled game loop
+      throttledGameLoop();
     });
   }
 
@@ -127,7 +138,7 @@ class InputManager {
     this.goLeft = goLeft;
     this.goRight = goRight;
     this.dropFruit = dropFruit;
-    let canDrop = true;
+    let canDrop = false;
     let intervalR = null;
     let intervalL = null;
 
